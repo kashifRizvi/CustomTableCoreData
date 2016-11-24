@@ -94,12 +94,26 @@ class TableViewController: UITableViewController {
         let student = Student(context: context)
         student.name = currentCellData["name"]
         student.marks = currentCellData["marks"]
+        student.image = currentCellData["imageUrl"]
+        
+        (UIApplication.shared.delegate as! AppDelegate).saveContext()
+        
         getStudentData()
         return cell
     }
     
     func getStudentData() {
-        
+        do{
+            let result = try context.fetch(Student.fetchRequest()) as! [Student]
+            
+            for students in result {
+                print("Name : \(students.name)")
+                print("Marks : \(students.marks)")
+            }
+            
+        }catch{
+            print("Data cant be fetched !!")
+        }
     }
     
     /*
