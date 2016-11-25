@@ -52,6 +52,9 @@ class TableViewController: UITableViewController {
         
         var cell = CustomCellClass()
         cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CustomCellClass
+
+        let student = Student(context: context)
+
         
         let row = indexPath.row
         
@@ -61,16 +64,23 @@ class TableViewController: UITableViewController {
         cell.imageViewCell.image=nil
         cell.name.text = currentCellData["name"]
         cell.marks.text = currentCellData["marks"]
+        
+        student.id = Int16(row)
+        student.name = currentCellData["name"]
+        student.marks = Int32(currentCellData["marks"]!)!
+        
         let imgLink = currentCellData["imageUrl"]!
         let imgUrl = URL(string: imgLink)
         
-        if let present = pics[imgLink]{
-            cell.imageViewCell.image=present
-        }
-        else{
+        if Int16(row) == getStudentData(row: row).id{
+            if getStudentData(row: row).image != nil {
+            cell.imageViewCell.image = UIImage(data: imageAvailable as Data)
+            }
+        }else{
             DispatchQueue.global().async {[weak self] in
                 do {
                     let imgData = try Data(contentsOf: imgUrl!)
+                    student.image = imgData as NSData?
                     let downloadedImage = UIImage(data: imgData)
                     print(indexPath.row)
                     self?.pics[imgLink] = downloadedImage
@@ -91,26 +101,22 @@ class TableViewController: UITableViewController {
             }
         }
         
-        let student = Student(context: context)
-        student.name = currentCellData["name"]
-        student.marks = Int32(currentCellData["marks"]!)!
-//        student.image = currentCellData["imageUrl"]
+        
+        
         
         (UIApplication.shared.delegate as! AppDelegate).saveContext()
         
-        getStudentData()
+//        getStudentData()
         return cell
     }
     
-    func getStudentData() {
+    func getStudentData(row:Int) -> (id:Int16, image:NSData) {
+        var result = [Student]()
         do{
-            let result = try context.fetch(Student.fetchRequest()) as! [Student]
+            result = try context.fetch(Student.fetchRequest()) as! [Student]
             
-            for students in result {
-                print("Name : \(students.name!)")
-                print("Marks : \(students.marks)")
-            }
-            
+            let res = result[row].image
+            return (result[row].id, res! as NSData)
         }catch{
             print("Data cant be fetched !!")
         }
