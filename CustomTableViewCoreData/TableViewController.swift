@@ -74,7 +74,7 @@ class TableViewController: UITableViewController {
         
         if Int16(row) == getStudentData(row: row).id{
             if getStudentData(row: row).image != nil {
-            cell.imageViewCell.image = UIImage(data: imageAvailable as Data)
+            cell.imageViewCell.image = UIImage(data: getStudentData(row: row).image as Data)
             }
         }else{
             DispatchQueue.global().async {[weak self] in
@@ -112,14 +112,16 @@ class TableViewController: UITableViewController {
     
     func getStudentData(row:Int) -> (id:Int16, image:NSData) {
         var result = [Student]()
+        var res : NSData?
         do{
             result = try context.fetch(Student.fetchRequest()) as! [Student]
             
-            let res = result[row].image
+            res = result[row].image
             return (result[row].id, res! as NSData)
         }catch{
             print("Data cant be fetched !!")
         }
+        return (result[row].id, res! as NSData)
     }
     
     /*
